@@ -6,8 +6,7 @@ from math import *
 from funcao_filtro import filtro
 
 
-
-img_in = cv2.imread("visao_de_maquina_projeto_1\img 2\Fig_NOK_01.jpg", cv2.IMREAD_GRAYSCALE)
+img_in = cv2.imread("NOK_borda\Fig_NOK_15.jpg", cv2.IMREAD_GRAYSCALE)
 if img_in is None:
     print("File not found. Bye!")
     exit(0)
@@ -17,7 +16,7 @@ img_bin = np.where(img_in >97, 255, 0).astype("uint8")
 cv2.imshow('graycsale image',img_in)
 cv2.waitKey(0)
 
-aro_exterior = filtro(img_bin,True,True,False,True,False,Color = 0,Area_min = 10000,Area_max = 200000,Convexity_max=1)
+aro_exterior = filtro(img_bin,True,True,False,True,False,Color = 0,Area_min = 10000,Area_max = 200000,Convexity_max=0.96)
 img1_text = cv2.cvtColor(img_in,cv2.COLOR_GRAY2RGB)#pneus
 
 i=1
