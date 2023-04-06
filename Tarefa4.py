@@ -6,11 +6,11 @@ from math import *
 from funcao_filtro import filtro
 
 
+
 img_in = cv2.imread("visao_de_maquina_projeto_1\img 2\Fig_NOK_01.jpg", cv2.IMREAD_GRAYSCALE)
 if img_in is None:
     print("File not found. Bye!")
     exit(0)
-
 
 img_bin = np.where(img_in >97, 255, 0).astype("uint8")
 
@@ -33,5 +33,5 @@ img1_with_KPs = cv2.drawKeypoints(img_in, aro_exterior, np.array([]), (0,0,255),
 cv2.imshow('graycsale image',img1_with_KPs)
 cv2.waitKey(0)
 
-plt.imshow(img_bin, cmap='gray')
+plt.imshow(img_in, cmap='gray')
 plt.show()
