@@ -9,8 +9,6 @@ def grayscale_especial (img_in,const_red=1.0,const_green=1.0,const_blue=1.0):
     [B,G,R] = cv2.split(img_in)
 
     (height,width) = R.shape
-    print ("Height = ", height)
-    print ("Width = ", width)
 
     R_bin = np.zeros((height,width), dtype = 'uint8')
     G_bin = np.zeros((height,width), dtype = 'uint8')
@@ -84,12 +82,12 @@ def filtro_blobs(img_in, byColor, byArea, byCircularity, byConvexity,byInertia,
     
     return filtrado
 
-def open(img,kernel = np.ones((3,3),np.uint8)):
+def close(img,kernel = np.ones((3,3),np.uint8)):
     dilation = cv2.dilate(img,      kernel, iterations = 1) 
     erosion  = cv2.erode (dilation, kernel, iterations = 1)
-    return dilation
+    return erosion
 
-def close(img,kernel= np.ones((3,3),np.uint8)):
+def open(img,kernel= np.ones((3,3),np.uint8)):
     erosion = cv2.erode(img, kernel, iterations = 1)
     dilation = cv2.dilate(erosion,kernel, iterations = 1) 
     return dilation

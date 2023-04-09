@@ -6,26 +6,24 @@ from math import *
 from filtros_extras import *
 
 
-img_in = cv2.imread("NOK_borda\Fig_NOK_15.jpg", cv2.IMREAD_COLOR)
+img_in = cv2.imread("Convexity_Test.jpg", cv2.IMREAD_COLOR)
 if img_in is None:
     print("File not found. Bye!")
     exit(0)
 
 gray = grayscale_especial(img_in,0.0,0.13,0.87)
-gray_nit = filtro_nitidez(gray)
+#gray_nit = filtro_nitidez(gray)
 
-plt.imshow(gray, cmap='gray')
-plt.show()
-plt.imshow(gray_nit, cmap='gray')
-plt.show()
 
-img_bin = np.where(gray_nit >97, 255, 0).astype("uint8")
+gray = cv2.resize(gray, (400, 400))              # Resize image
+cv2.imshow("output", gray)                       # Show image
+cv2.waitKey(0)                                  # Display the image infinitely until any keypress
 
-cv2.imshow('grayscale image',gray)
-cv2.waitKey(0)
+img_bin = np.where(gray >97, 255, 0).astype("uint8")
 
-aro_exterior = filtro_blobs(img_bin,True,True,False,True,False,Color = 0,Area_min = 10000,Area_max = 200000,Convexity_max=0.99)
+aro_exterior = filtro_blobs(gray,True,False,False,True,False,Color = 0,Convexity_min=0.9,Convexity_max=0.99)
 img1_text = img_in
+img1_text = cv2.resize(img1_text,(400,400))
 
 i=1
 for KPi in aro_exterior:
@@ -33,10 +31,14 @@ for KPi in aro_exterior:
     img1_text = cv2.putText(img1_text, str(i), (int(KPi.pt[0]),int(KPi.pt[1])), cv2.FONT_HERSHEY_PLAIN, 2,(0,0,255),2)
     i=i+1
 
+
+gray = cv2.resize(gray, (400, 400))              # Resize image
 cv2.imshow('graycsale image',img1_text)
 cv2.waitKey(0)
 
-img1_with_KPs = cv2.drawKeypoints(img_in, aro_exterior, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+img1_with_KPs = cv2.drawKeypoints(gray, aro_exterior, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+
 cv2.imshow('graycsale image',img1_with_KPs)
 cv2.waitKey(0)
 
