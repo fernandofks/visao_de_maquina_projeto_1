@@ -22,15 +22,29 @@ dir_list = os.listdir(path)
 #o tamanho da esteira foi fornecido pelo Dinho no arquivo de rubricas disponível no BB
 #nas imagens a largura da esteira é de 65mm
 #nos vídeos a largura da esteira é de 75.6mm
-largura_da_esteira = 65 # mm  
+largura_da_esteira = 65 # mm
 
+#Criando um dataframe para registrar e imprimir os resultados dos testes (e possivelmente exportar isso para uma planilha do Excel)
+df = pd.DataFrame()
+  
+Nome_arquivo     = []
+Teste_borda      = []
+Teste_superficie = []
+Diametro_Peca    = []
+Status_Diametro  = []
+Relacao_AB       = []
+Status_Raio_AB   = []
+
+ 
 f = plt.figure(figsize=(10,5))
 for i in range(0,len(dir_list)):
     #encontrar uma maneira mais bonita de fazer a soma das strings abaixo
     img_in = cv2.imread(path + "/" + str(dir_list[i]), cv2.IMREAD_GRAYSCALE)
     
-    #O filtro de nitidez especial está apresentando erros, provavelmente um overshoot do range (0,255), verificar se há astype("int32") 
-    #img_in = grayscale_especial(img_in)
+    Nome_arquivo.append(str(dir_list[i]))
+    
+    #O filtro de grayscale especial está apresentando erros, provavelmente um overshoot do range (0,255), verificar se há astype("int32") 
+    #img_in = grayscale_especial(img_in,const_red=0.05,const_green=0.17,const_blue=0.78)
     
     (height,width) = img_in.shape
     
@@ -44,15 +58,19 @@ for i in range(0,len(dir_list)):
     ##### Parte 1 resultados: Funcionando OK até aqui
     
     ##### Parte 2: Rodar um dos testes com a imagem (teste escolhido: Contorno externo)
-    
-    returns,thresh=cv2.threshold(img_in,97,255,cv2.THRESH_BINARY)
-    contours,hierachy=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+    #img_bin = np.where(img_in < 105, 0, 255)
+    returns,thresh=cv2.threshold(img_in,80,255,cv2.THRESH_BINARY)
+    contours,hierachy=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     
     img1_text = cv2.cvtColor(img_in,cv2.COLOR_GRAY2RGB)
+        
+    #cv2.imshow('threshold', thresh)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
     
     if len(contours) != 0:
         for j in range(len(contours)):
-            if len(contours[j]) >= 1000:
+            if len(contours[j]) >= 800:
                 # Draw the contour on the original image in green color
                 cv2.drawContours(img1_text,[contours[j]],-1,(0,255,0),2)
                 
@@ -68,9 +86,11 @@ for i in range(0,len(dir_list)):
                 
                 # o trecho abaixo é provisório e vai ser substituido por um append no pandas
                 if convex:
-                    print (i, "is convex")
+                    Teste_borda.append("Sim")
+                    print([i], "Sim")
                 else:
-                    print (i, "is not convex")
+                    Teste_borda.append("Não")
+                    print([i],"Não")
                     
             else:
                 # optional to "delete" the small contours
@@ -79,9 +99,13 @@ for i in range(0,len(dir_list)):
     cv2.imshow('Convexity Detection', img1_text)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
     
 plt.show()
 
+df["Nome do Arquivo"] = Nome_arquivo
+#df["Tem convexidade"] = Teste_borda
+print(df)
 
 #Parte 1(Funcionando Ok)
 #Parte 2(Gerando um contorno extra por conta de um "blob" no topo da tela) 

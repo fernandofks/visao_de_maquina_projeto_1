@@ -10,9 +10,9 @@ def grayscale_especial (img_in,const_red=1.0,const_green=1.0,const_blue=1.0):
 
     (height,width) = R.shape
 
-    R_bin = np.zeros((height,width), dtype = 'uint8')
-    G_bin = np.zeros((height,width), dtype = 'uint8')
-    B_bin = np.zeros((height,width), dtype = 'uint8')
+    R_bin = np.zeros((height,width), dtype = 'int32')
+    G_bin = np.zeros((height,width), dtype = 'int32')
+    B_bin = np.zeros((height,width), dtype = 'int32')
 
     for i in range (height-1):
         for j in range (width-1):
@@ -21,6 +21,7 @@ def grayscale_especial (img_in,const_red=1.0,const_green=1.0,const_blue=1.0):
             B_bin[i,j] = B[i,j]*const_blue
 
     Merged = R_bin+G_bin+B_bin
+    Merged = np.clip(Merged, 0, 255).astype(np.uint8)
     return Merged
 
 #Conforme visto na aula 7 exercício 6
