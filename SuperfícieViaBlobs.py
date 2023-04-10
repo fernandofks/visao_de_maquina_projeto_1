@@ -8,8 +8,8 @@ import pandas as pd # para desenhar/plotar as tabelas informando os status das p
 
 from filtros_extras import *
 
-path = "OK"
-#path = "NOK_borda"
+#path = "OK"
+path = "NOK_superficie"
 
 dir_list = os.listdir(path)
 
@@ -40,8 +40,8 @@ for i in range(0,len(dir_list)):
         img_text = cv2.putText(img_text, str(i), (int(KPi.pt[0]),int(KPi.pt[1])), cv2.FONT_HERSHEY_PLAIN, 2,(0,0,255),2)
         j=j+1
 
-    img_with_KPs = cv2.drawKeypoints(img_text, aro_exterior, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    img1_with_KPs = cv2.drawKeypoints(img_text, aro_exterior, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
-    #cv2.imshow('output',img_bin)
-    cv2.imshow('output',img_with_KPs)
+    cv2.imshow('output',img_bin)
+    #cv2.imshow('output',img1_with_KPs)
     cv2.waitKey(0)

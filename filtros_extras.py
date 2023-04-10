@@ -55,6 +55,59 @@ def filtro_nitidez (img_in):
     
     return filt_nitidez
 
+def super_filtro (img_in,type):
+    (height,width) = img_in.shape
+    
+    m = 3 # tamanho da matriz gaussiana
+    d = int((m-1)/2)
+    sigma = 2 
+    
+    PrewittX_kernel = [[-1,0,1],[-1,0,1],[-1,0,1]]
+    PrewittY_kernel = [[-1,-1,-1],[0,0,0],[1,1,1]]
+    SobelX_kernel = [[-1,0,1],[-2,0,2],[-1,0,1]]
+    SobelY_kernel = [[-1,-2,-1],[0,0,0],[1,2,1]]
+    Laplacian_kernel = [[0,-1,0],[-1,4,-1],[0,-1,0]]
+    Nitidez_kernel = [[0,-1,0],[-1,5,-1],[0,-1,0]]
+    
+    
+    filt_sobelX = np.zeros((height,width), dtype="int32")
+    filt_sobelY = np.zeros((height,width), dtype="int32")
+    filt_prewittX = np.zeros((height,width), dtype="int32")
+    filt_prewittY = np.zeros((height,width), dtype="int32")
+    filt_sobelConv = np.zeros((height,width), dtype="int32")
+    filt_derivada_segunda = np.zeros((height,width), dtype="int32")
+    filt_nitidez = np.zeros((height,width), dtype="int32")
+    
+    for i in range (d, height-d):
+        for j in range (d, width-d):
+            
+            secao_img = img_in[i-d:i+d+1, j-d:j+d+1] 
+            
+            prod_imag_SobX_kernel    = SobelX_kernel * secao_img
+            prod_imag_SobY_kernel    = SobelY_kernel * secao_img
+            prod_imag_PreX_kernel    = PrewittX_kernel * secao_img
+            prod_imag_PreY_kernel    = PrewittY_kernel * secao_img
+            prod_imag_d2_kernel      = Laplacian_kernel * secao_img
+            prod_imag_Nitidez_kernel = Nitidez_kernel * secao_img + Nitidez_kernel
+            
+
+            filt_sobelX[i,j]           = np.clip( abs(prod_imag_SobX_kernel.sum()), 0, 255).astype(np.uint8)
+            filt_sobelY[i,j]           = np.clip(abs(prod_imag_SobY_kernel.sum()), 0, 255).astype(np.uint8)
+            filt_prewittX[i,j]             = np.clip(abs(prod_imag_PreX_kernel.sum()), 0, 255).astype(np.uint8)
+            filt_prewittY[i,j]             = np.clip(abs(prod_imag_PreY_kernel.sum()), 0, 255).astype(np.uint8)
+            filt_sobelConv[i,j]        = np.clip(filt_sobelX[i,j] + filt_sobelY[i,j], 0, 255).astype(np.uint8)
+            filt_derivada_segunda[i,j] = np.clip(abs(prod_imag_d2_kernel.sum()), 0, 255).astype(np.uint8)
+            filt_nitidez[i,j]          = np.clip(abs(prod_imag_Nitidez_kernel.sum()), 0, 255).astype(np.uint8)
+            
+    if type == "derivada":
+        return filt_derivada_segunda
+    
+    elif type == "nitidez":
+        return filt_nitidez
+    
+    else:
+        return "filter not specified on function, go to filtros_extras.py and work it out"
+
 #Conforme visto na aula 11 exercício 1
 #acho que aceita apenas imagens gratscale (canal único)
 def filtro_blobs(img_in, byColor, byArea, byCircularity, byConvexity,byInertia,
