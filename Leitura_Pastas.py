@@ -15,7 +15,9 @@ from filtros_extras import *
 
 #Parte 1: Importando e lendo todos os arquivos em uma pasta:
 
-path = "OK"
+#path = "OK"
+path = "NOK_borda"
+
 dir_list = os.listdir(path)
 
 #tamanho da esteira em mm (usado para obter a conversão px para mm e assim calcular o diâmetro da peça)
@@ -40,18 +42,16 @@ f = plt.figure(figsize=(10,5))
 for i in range(0,len(dir_list)):
     #encontrar uma maneira mais bonita de fazer a soma das strings abaixo
     img_in = cv2.imread(path + "/" + str(dir_list[i]), cv2.IMREAD_GRAYSCALE)
-    
-    Nome_arquivo.append(str(dir_list[i]))
-    
-    #O filtro de grayscale especial está apresentando erros, provavelmente um overshoot do range (0,255), verificar se há astype("int32") 
-    #img_in = grayscale_especial(img_in,const_red=0.05,const_green=0.17,const_blue=0.78)
-    
-    (height,width) = img_in.shape
-    
     if img_in is None:
         print("File not found. Bye!")
         exit(0)
-        
+    
+    #O filtro de grayscale especial está apresentando erros, provavelmente um overshoot do range (0,255), verificar se há astype("int32") 
+    #img_in = grayscale_especial(img_in,const_red=0.05,const_green=0.17,const_blue=0.78)
+            
+    Nome_arquivo.append(str(dir_list[i]))
+    (height,width) = img_in.shape
+    
     #plotar a imagem em um gráfico
     ax = f.add_subplot (3,5,i+1)
     plt.imshow(img_in, cmap='gray')
@@ -63,11 +63,17 @@ for i in range(0,len(dir_list)):
     contours,hierachy=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     
     img1_text = cv2.cvtColor(img_in,cv2.COLOR_GRAY2RGB)
-        
-    #cv2.imshow('threshold', thresh)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()
     
+    convex = cv2.isContourConvex(contours[0])
+    
+    #sustituir o if e else abaixo por um append no pandas
+    if convex:
+        Teste_borda.append("Sim")
+        print([i], "Sim")
+    else:
+        Teste_borda.append("Não")
+        print([i],"Não")
+
     if len(contours) != 0:
         for j in range(len(contours)):
             if len(contours[j]) >= 800:
@@ -82,16 +88,7 @@ for i in range(0,len(dir_list)):
 
                 # Draw the bounding box on the original image in blue color
                 #cv2.rectangle(img_in,(x,y),(x+w,y+h),(255,0,0),2)
-                convex = cv2.isContourConvex(contours[j])
                 
-                # o trecho abaixo é provisório e vai ser substituido por um append no pandas
-                if convex:
-                    Teste_borda.append("Sim")
-                    print([i], "Sim")
-                else:
-                    Teste_borda.append("Não")
-                    print([i],"Não")
-                    
             else:
                 # optional to "delete" the small contours
                 cv2.drawContours(thresh,contours,-1,(0,0,0),-1)

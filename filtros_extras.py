@@ -24,6 +24,17 @@ def grayscale_especial (img_in,const_red=1.0,const_green=1.0,const_blue=1.0):
     Merged = np.clip(Merged, 0, 255).astype(np.uint8)
     return Merged
 
+def ajuste_brilho_contraste(img_in,brilho,contraste):
+    (height,width) = img_in.shape
+    img_in = img_in.astype(np.int32)
+    img_out = np.zeros((height,width), dtype = "uint8")
+
+    for i in range (height-1):
+        for j in range (width-1):
+            intens32 = img_in[i,j]*contraste + brilho       
+            img_out[i,j] = np.clip(intens32, 0, 255).astype(np.uint8)
+    return img_out
+
 #Conforme visto na aula 7 exercício 6
 #aceita apenas inputs de imagens grayscale
 def filtro_nitidez (img_in):
