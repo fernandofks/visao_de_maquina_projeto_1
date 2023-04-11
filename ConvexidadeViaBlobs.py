@@ -22,7 +22,7 @@ for i in range(0,len(dir_list)):
         print("File not found. Bye!")
         exit(0)
     
-    img_in = grayscale_especial(img_in,0.0,0.87,0.13)
+    img_in = grayscale_especial(img_in,0.0,1.0,0.0)
     # img_in = ajuste_brilho_contraste(img_in, -70, 1)
     #img_in = filtro_nitidez(img_in)
         

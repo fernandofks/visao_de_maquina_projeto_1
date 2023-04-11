@@ -46,67 +46,72 @@ for i in range(0,len(dir_list)):
         print("File not found. Bye!")
         exit(0)
     
+    #Separando os canais de cor da imagem original
+    [B,G,R] = cv2.split(img_in)
+    (height,width) = G.shape
+    
     #O filtro de grayscale especial está apresentando erros, provavelmente um overshoot do range (0,255), verificar se há astype("int32") 
-    img_in = grayscale_especial(img_in,const_red=0.05,const_green=0.75,const_blue=0.20)
+    #img_in = grayscale_especial(img_in,const_red=0.00,const_green=1.00,const_blue=0.00)
             
     Nome_arquivo.append(str(dir_list[i]))
-    (height,width) = img_in.shape
     
     #plotar a imagem em um gráfico
     #ax = f.add_subplot (3,5,i+1)
-    #plt.imshow(img_in, cmap='gray')
+    #plt.imshow(G, cmap='gray')
     ##### Parte 1 resultados: Funcionando OK até aqui
     
     ##### Parte 2: Rodar um dos testes com a imagem (teste escolhido: Contorno externo)
-    #img_bin = np.where(img_in < 105, 0, 255)
-    returns,thresh=cv2.threshold(img_in,105,255,cv2.THRESH_BINARY)
+    returns,thresh=cv2.threshold(G,70,255,cv2.THRESH_BINARY)
+    thresh =  close (thresh)
     
     #usado para mostrar os contornos binarizados
     #ax = f.add_subplot (3,5,i+1)
     #plt.imshow(thresh, cmap='gray')
-    
+
+    #convexity is calculated by the ratio of blob area/blob's convex hull area 
+    # Get the convex hull of the contour
     contours,hierachy=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
     
-    img1_text = cv2.cvtColor(img_in,cv2.COLOR_GRAY2RGB)
+    lista_perimetro =[]
     
-    convex = cv2.isContourConvex(contours[0])
+    img1_text = cv2.cvtColor(G,cv2.COLOR_GRAY2RGB)
     
-    #sustituir o if e else abaixo por um append no pandas
-    #if convex:
-    #    Teste_borda.append("Sim")
-    #    print([i], "é convexo")
-    #else:
-    #    Teste_borda.append("Não")
-    #    print([i],"Não é convexo")
-
-    if len(contours) != 0:
-        for j in range(len(contours)):
-            if len(contours[j]) >= 200:
-                # Draw the contour on the original image in green color
-                cv2.drawContours(img1_text,[contours[j]],-1,(0,255,0),2)
-                
-                # Draw a circle at the centroid
-                #cv2.circle(img_in, (cx, cy), 5, (0, 0, 255), -1)
-                
-                # Compute the bounding box of the contour
-                x,y,w,h = cv2.boundingRect(contours[j])
-
-                # Draw the bounding box on the original image in blue color
-                #cv2.rectangle(img_in,(x,y),(x+w,y+h),(255,0,0),2)
-                
-                convex = cv2.isContourConvex(contours[j])
-                
-                if convex:
-                    Teste_borda.append("Sim")
-                    print([i], "é convexo")
-                else:
-                    Teste_borda.append("Não")
-                    print([i],"Não é convexo")
-                
+    for j in range(len(contours)):
+        #achar o perimetro maximo para gerar esse contorno
+        Perimetro = cv2.arcLength(contours[j],True)
+        #lista_perimetro.append(Perimetro)
+        #Substituir por perimetro de contorno ao invés de comprimento da lista de contornos
+        if Perimetro >= 1100:  
+            cv2.drawContours(img1_text,[contours[j]],-1,(0,0,255),4)
+            hull = cv2.convexHull(contours[j])
+            cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
+            
+            area_contorno = cv2.contourArea(contours[j])
+            area_hull = cv2.contourArea(hull)
+            convexidade = area_contorno/area_hull
+            
+            if convexidade < 0.95:
+                Teste_borda.append("Peça ruim")
             else:
-                # optional to "delete" the small contours
-                cv2.drawContours(thresh,contours,-1,(0,0,0),-1)
+                Teste_borda.append("Peça boa")
+                
+            print ("Perimetro",[i], Perimetro)
+            print ("Area_Contorno", [i], area_contorno)
+            print ("Area_Hull", [i], area_hull)
+            print ("Convexidade",[i], convexidade ,"\n")
+            
+            
+    #aro_exterior = filtro_blobs(G,True,True,False,True,False,Color = 0,Area_min=10000,Area_max=200000,Convexity_min = 0.95,Convexity_max=1)
+    #img_text = img_in
     
+    #j=1
+    #for KPi in aro_exterior:
+        #print("Blob_", i, ": X= ", KPi.pt[0], " Y= ", KPi.pt[1], " size=", KPi.size**2, " ang=", KPi.angle)
+        #img_text = cv2.putText(img_text, str(i), (int(KPi.pt[0]),int(KPi.pt[1])), cv2.FONT_HERSHEY_PLAIN, 2,(0,0,255),2)
+        #j=j+1
+
+    #img1_with_KPs = cv2.drawKeypoints(img_text, aro_exterior, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
     ax = f.add_subplot (3,5,i+1)
     plt.imshow(img1_text, cmap='gray')
                 
@@ -114,7 +119,6 @@ for i in range(0,len(dir_list)):
     #cv2.waitKey(0)
     #cv2.destroyAllWindows()
 
-    
 plt.show()
 
 df["Nome do Arquivo"] = Nome_arquivo
@@ -122,4 +126,3 @@ df["Tem convexidade"] = Teste_borda
 print(df)
 
 #Parte 1(Funcionando Ok)
-#Parte 2(Gerando um contorno extra por conta de um "blob" no topo da tela) 

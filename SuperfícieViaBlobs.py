@@ -31,7 +31,7 @@ for i in range(0,len(dir_list)):
 
     #Quando os parametros de convexidade estão configurados para min = 0.995 e max = 1 Peças com defeitos na borda são todas rejeitadas
     #no entanto peças sem defitos nas bordas também são
-    aro_exterior = filtro_blobs(img_bin,True,True,False,True,False,Color = 0,Area_min=10000,Area_max=200000,Convexity_min = 0.99,Convexity_max=1)
+    aro_exterior = filtro_blobs(img_bin,True,True,False,True,False,Color = 0,Area_min=10000,Area_max=200000,Convexity_min = 0.95,Convexity_max=1)
     img_text = cv2.cvtColor(img_in,cv2.COLOR_GRAY2BGR)
     
     j=1
