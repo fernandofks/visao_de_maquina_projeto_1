@@ -15,8 +15,8 @@ from filtros_extras import *
 
 #Parte 1: Importando e lendo todos os arquivos em uma pasta:
 
-path = "OK"
-#path = "NOK_borda"
+#path = "OK"
+path = "NOK_borda"
 
 dir_list = os.listdir(path)
 
@@ -122,8 +122,9 @@ for i in range(0,len(dir_list)):
     #img1_with_KPs = cv2.drawKeypoints(img_text, aro_exterior, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
     ax = f.add_subplot (3,5,i+1)
-    plt.imshow(thresh, cmap='gray')
-    #plt.imshow(img1_text, cmap='gray')
+    #plt.imshow(B, cmap='gray')
+    #plt.imshow(thresh, cmap='gray')
+    plt.imshow(img1_text, cmap='gray')
                 
     #cv2.imshow('Convexity Detection', img1_text)
     #cv2.waitKey(0)
