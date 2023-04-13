@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd # para desenhar/plotar as tabelas informando os status das peças em cada teste
 
 from filtros_extras import *
+from fillHoles import fillHoles
 
 #importar imagens de todas as pastas
 #rodar todos os testes com todas as imagens
@@ -15,8 +16,8 @@ from filtros_extras import *
 
 #Parte 1: Importando e lendo todos os arquivos em uma pasta:
 
-#path = "OK"
-path = "NOK_borda"
+path = "OK"
+#path = "NOK_borda"
 
 dir_list = os.listdir(path)
 
@@ -51,6 +52,10 @@ for i in range(0,len(dir_list)):
     #Separando os canais de cor da imagem original
     [B,G,R] = cv2.split(img_in)
     (height,width) = B.shape
+    
+    #testes de filtro para melhorar output
+    #B = CorrecaoGamma(B,1)
+    #B = cv2.bilateralFilter(B,4,130,75)
     
     #O filtro de grayscale especial está apresentando erros, provavelmente um overshoot do range (0,255), verificar se há astype("int32") 
     #img_in = grayscale_especial(img_in,const_red=0.00,const_green=1.00,const_blue=0.00)

@@ -35,6 +35,16 @@ def ajuste_brilho_contraste(img_in,brilho,contraste):
             img_out[i,j] = np.clip(intens32, 0, 255).astype(np.uint8)
     return img_out
 
+#código fonte: https://lindevs.com/apply-gamma-correction-to-an-image-using-opencv
+def CorrecaoGamma(img_in, gamma):
+    invGamma = 1 / gamma
+
+    table = [((i / 255) ** invGamma) * 255 for i in range(256)]
+    table = np.array(table, np.uint8)
+
+    img_out = cv2.LUT(img_in, table)
+    return img_out
+
 #Conforme visto na aula 7 exercício 6
 #aceita apenas inputs de imagens grayscale
 def filtro_nitidez (img_in):
