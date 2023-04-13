@@ -69,7 +69,8 @@ for i in range(0,len(dir_list)):
     
     ##### Parte 2: Rodar um dos testes com a imagem (teste escolhido: Contorno externo)
     returns,thresh=cv2.threshold(B,70,255,cv2.THRESH_BINARY_INV)
-    thresh =  close (thresh)
+    #thresh =  close (thresh)
+    thresh = fillHoles(thresh)
     
     #usado para mostrar os contornos binarizados
     #ax = f.add_subplot (3,5,i+1)
