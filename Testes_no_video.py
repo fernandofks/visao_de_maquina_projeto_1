@@ -157,17 +157,16 @@ while cap.isOpened():
                     
                     Numero_da_peca.append(cont_pecas)
                     Convexidade_valor.append(convexidade)
-                    #Teste_borda
                     
                 
                 #raises the first_appearance flag
                 if area_contorno<30000 and y>400:
                     first_appearance = True
 
-                     
+            #Calculate te moments of the contour         
             M = cv2.moments(contorno_out)
             
-            if M["m00"] > 0: #evitar que o video crashe por conta de divisão por 0
+            if M["m00"] > 0: #avoid crashes caused by a division by zero
                 cX = (M["m10"] / M["m00"])
                 cY = (M["m01"] / M["m00"])
 
@@ -177,18 +176,16 @@ while cap.isOpened():
             
             #track countour center
             cv2.circle(img1_text, (int(cX), int(cY)), 5, (255, 255, 255), -1)
-            
-            #area_contorno = cv2.contourArea(contorno_out)
-            #area_hull = cv2.contourArea(hull)
-            #if area_hull >= 1: #evitar que o video crashe por conta de divisão por 0
-            #    convexidade = area_contorno/area_hull
-        
+
         #also, if there are no countours detected in the image it raises the first appearance flag
         else:
             first_appearance = True
             
         # Display the resulting image
+        
+        #cv2.imshow('Blob Detection', thresh)
         cv2.imshow('Blob Detection', img1_text)
+        
         # Wait for a key press to exit
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
