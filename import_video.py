@@ -13,7 +13,7 @@ from random import randint # used to generate borders to off-limits cropped imag
 from tensorflow import keras
 
 # Load the video file
-cap = cv2.VideoCapture('Video1_Vedacao.mp4')
+cap = cv2.VideoCapture('Video2_Vedacao.mp4')
 
 #Flag that checks if the rubber in the image is new or not
 first_appearance = True
@@ -72,7 +72,7 @@ while cap.isOpened():
                     #generating cropped images in order to make the model work
                     #documentation used for this part: https://docs.opencv.org/3.4/dc/da3/tutorial_copyMakeBorder.html
                     #documentation used for this part: https://stackoverflow.com/questions/55733086/opencv-how-to-overcrop-an-image
-                    src = img1_text
+                    src = img1_text_R
                     borderType = cv2.BORDER_REPLICATE
                     boarderSize = .1
                     top = int(boarderSize * src.shape[0])  # shape[0] = rows
@@ -111,7 +111,7 @@ while cap.isOpened():
                     cv2.imshow("cropped", cropped_image)
                     # Display cropped image
                     #cv2.imshow("cropped", cropped_image)
-                    
+                    cv2.imwrite('imagens_classificar/'+str(cont_pecas)+'_2.jpg', cropped_image)
                     cont_pecas += 1
                     #print ([cont_pecas], y)
                         
