@@ -91,18 +91,23 @@ while cap.isOpened():
                     border_height = dst.shape[0]
                     border_width = dst.shape[1]
                     x_offset = 0
-                    y_offset = 0
+                    y_offset = -70
                     x_min_border = int((border_width - x_des)/2) + x_offset
                     y_min_border = int((border_height - y_des)/2) + y_offset
                     x_max_border = int((border_width + x_des)/2) + x_offset
                     y_max_border = int((border_height  + y_des)/2) + y_offset
                     
-                    cv2.rectangle(dst, (x_min_border, y_min_border), (x_max_border, y_max_border), (255, 0, 0), 3)
+                    #x_min_border = int(left + x_offset)
+                    #y_min_border = int(x_min_border + x_des)
+                    #x_max_border = int(left + x_des + x_offset)
+                    #y_max_border = int(y_min_border +y_des)
+                    
+                    dst_rect = cv2.rectangle(dst, (x_min_border, y_min_border), (x_max_border, y_max_border), (255, 0, 0), 3)
                     #cv2.rectangle(dst, (int((border_width - x_des)/2), int((border_height - y_des)/2)+20), (int((border_width + x_des)/2),int((border_height + y_des)/2)+20), (255, 0, 0), 3)
                     
                     #o comando de crop image funciona na base de (y,x) e não (x,y) e se passaram 30 min até eu descobrir isso
                     #documentação dessa merda: https://stackoverflow.com/questions/15589517/how-to-crop-an-image-in-opencv-using-python
-                    cropped_image = src[y_min_border: y_max_border, x_min_border: x_max_border]
+                    cropped_image = dst[y_min_border: y_max_border, x_min_border: x_max_border]
                     cv2.imshow("cropped", cropped_image)
                     # Display cropped image
                     #cv2.imshow("cropped", cropped_image)
@@ -116,7 +121,7 @@ while cap.isOpened():
                     #plt.imshow(B, cmap='gray')
                     #plt.imshow(thresh, cmap='gray')
                     #plt.imshow(img1_text, cmap='gray')
-                    plt.imshow(dst, cmap='gray')
+                    plt.imshow(dst_rect, cmap='gray')
                     conjunto_NOK_video.append(img1_text_R)
                     
                     #### Teste de contornos
