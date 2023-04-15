@@ -23,7 +23,7 @@ cont_pecas = 0
 conjunto_NOK_video=[]
 diametro_ideal_mm = 50
 tamanho_da_esteira = 75.6
-x_des,y_des = (int(508),int(468))
+x_des,y_des = (int(508),int(486))
 
 df = pd.DataFrame()
 #test_result lists, for every rubber the test result will be appended here and they will be added as a dataSeries to a dataFrame
@@ -117,7 +117,7 @@ while cap.isOpened():
                     #documentation used for this part: https://stackoverflow.com/questions/55733086/opencv-how-to-overcrop-an-image
                     
                     #prepparing the image in order to crop it:
-                    src = img1_text
+                    src = img1_text_R
                     borderType = cv2.BORDER_REPLICATE
                     boarderSize = .1
                     top = int(boarderSize * src.shape[0])  # shape[0] = rows
@@ -193,7 +193,7 @@ while cap.isOpened():
         break
 
 conjunto_NOK_video=np.stack(conjunto_NOK_video, axis=0)
-#model=keras.models.load_model('./superficie.h5')
+#model=keras.models.load_model('./superficie_video.h5')
 #print(model.predict(conjunto_NOK_video))
 
 # Release the video capture object and close all windows
@@ -210,4 +210,4 @@ df["Status A/B"]         = Status_Raio_AB
 df["Convexidade medida"] = Convexidade_valor
 df["Status borda"]       = Teste_borda
 
-print(df)
+#print(df)
