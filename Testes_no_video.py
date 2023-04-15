@@ -21,6 +21,7 @@ first_appearance = True
 
 cont_pecas = 0 
 conjunto_NOK_video=[]
+diametro_ideal_mm = 50
 tamanho_da_esteira = 75.6
 x_des,y_des = (int(508),int(468))
 
@@ -47,15 +48,23 @@ while cap.isOpened():
         [B,G,R] = cv2.split(frame)
         (height,width) = R.shape
         
-        # binarizando a imagem
-        returns,thresh=cv2.threshold(B,120,255,cv2.THRESH_BINARY_INV)
-        #thresh = close(thresh)
-        thresh = fillHoles(thresh)
-        
-        contours,hierachy=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    
+        # Saving output image to be editted in img_text variable
         img1_text = cv2.cvtColor(B,cv2.COLOR_GRAY2RGB)
         img1_text_R = R
+        
+        # defining and appling thresholds to the image
+        returns,thresh=cv2.threshold(B,120,255,cv2.THRESH_BINARY_INV)
+        thresh = fillHoles(thresh)
+        
+        #find contours in the image
+        contours,hierachy=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+
+        #defining the ideal diameter and ideal area in squared pixels
+        diametro_ideal_px = diametro_ideal_mm*(width/tamanho_da_esteira)
+        raio_ideal_px = int(diametro_ideal_px/2)
+        area_circulo_ideal = int(pi*pow(raio_ideal_px,2))
+        
+        
         if len(contours) != 0:
             perimetro_max = -1
             contorno_out=max(contours, key=len)
@@ -64,67 +73,16 @@ while cap.isOpened():
                 (x, y), (MA, ma),angle =  ellipse
 
                 area_contorno = cv2.contourArea(contorno_out)
-                
-                
-                #print (area_contorno)
-                
+
                 #runs the tests and lowers the first_appearance flag    
                 if y > 200 and y< 300 and first_appearance and area_contorno>30000:
                     
                     first_appearance = False
                     
-                    #generating cropped images in order to make the model work
-                    #documentation used for this part: https://docs.opencv.org/3.4/dc/da3/tutorial_copyMakeBorder.html
-                    #documentation used for this part: https://stackoverflow.com/questions/55733086/opencv-how-to-overcrop-an-image
-                    
-                    src = img1_text
-                    borderType = cv2.BORDER_REPLICATE
-                    boarderSize = .1
-                    top = int(boarderSize * src.shape[0])  # shape[0] = rows
-                    bottom = int(boarderSize * src.shape[0])
-                    left = int(boarderSize * src.shape[1])  # shape[1] = cols
-                    right = left    
-                    value = [randint(0,255), randint(0,255), randint(0,255)]
-                    dst = cv2.copyMakeBorder(src, top, bottom, left, right, borderType, None, value)
-                    
-                    #actually cropping the image (before making border it actually works)
-                    #cv2.rectangle(src, (int(x - x_des/2), int(y - y_des/2)), (int(x + x_des/2),int(y + y_des/2)), (255, 0, 0), 3)
-                    #cropped_image = src[int(x - x_des/2):int(x + x_des/2), int(y - y_des/2):int(y + y_des/2)]
-                    
-                    #actually actually cropping the image
-                    #dst = cv2.cvtColor(dst,cv2.COLOR_BGR2GRAY)
-                    border_height = dst.shape[0]
-                    border_width = dst.shape[1]
-                    x_offset = 0
-                    y_offset = -70
-                    x_min_border = int((border_width - x_des)/2) + x_offset
-                    y_min_border = int((border_height - y_des)/2) + y_offset
-                    x_max_border = int((border_width + x_des)/2) + x_offset
-                    y_max_border = int((border_height  + y_des)/2) + y_offset
-                    
-                    dst_rect = cv2.rectangle(dst, (x_min_border, y_min_border), (x_max_border, y_max_border), (255, 0, 0), 3)
-                    #cv2.rectangle(dst, (int((border_width - x_des)/2), int((border_height - y_des)/2)+20), (int((border_width + x_des)/2),int((border_height + y_des)/2)+20), (255, 0, 0), 3)
-                    
-                    #o comando de crop image funciona na base de (y,x) e não (x,y) e se passaram 30 min até eu descobrir isso
-                    #documentação dessa merda: https://stackoverflow.com/questions/15589517/how-to-crop-an-image-in-opencv-using-python
-                    cropped_image = dst[y_min_border: y_max_border, x_min_border: x_max_border]
-                    
-                    #mostra a imagem croppada numa janelinha
-                    cv2.imshow("cropped", cropped_image)
-                    # Display cropped image
-                    #cv2.imshow("cropped", cropped_image)
-                    
-                    cont_pecas += 1
-
-                    ax = f.add_subplot (4,6,cont_pecas)
-                    #plt.imshow(B, cmap='gray')
-                    #plt.imshow(thresh, cmap='gray')
-                    #plt.imshow(img1_text, cmap='gray')
-                    plt.imshow(dst_rect, cmap='gray')
-                    conjunto_NOK_video.append(cropped_image)
+                    ##### Raises the count                   
+                    Numero_da_peca.append(cont_pecas)
                     
                     ##### Teste diametro
-                    
                     diametro=(MA + ma)/width*tamanho_da_esteira/2
                     Diametro_Peca.append(diametro)
                     
@@ -136,61 +94,96 @@ while cap.isOpened():
                     ##### Teste A/B elipses
                     elipseAB = MA/ma
                     Relacao_AB.append(elipseAB)
+                    
                     if MA/ma>0.95 and MA/ma<1.05:
                         Status_Raio_AB.append("A/B OK")
                     else:
                         Status_Raio_AB.append("A/B NOK")
-                    #print('imagem de indice '+str(Numero_da_peca))
-                    #print((MA + ma)/508*tamanho_da_esteira/2)
                     
-                    #### Teste de contornos
-                    
-                    cv2.drawContours(img1_text,contorno_out,-1,(0,0,255),4)
-                    hull = cv2.convexHull(contorno_out)
-                    cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
-                    circulo = cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
-            
+                    ##### Teste de contornos
                     area_contorno = cv2.contourArea(contorno_out)
-                    area_hull = cv2.contourArea(hull)
-                    area_circulo = int(pi*pow((MA+ma)/4,2))
-                    if area_hull >= 1: #evitar que o video crashe por conta de divisão por 0
-                        #convexidade = area_contorno/area_hull
-                        convexidade = area_contorno/area_circulo
-                    #print ([cont_pecas], y, convexidade)
+                    #area_hull = cv2.contourArea(hull)
                     
-                    cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
-                    
-                    Numero_da_peca.append(cont_pecas)
+                    convexidade = area_contorno/area_circulo_ideal
                     Convexidade_valor.append(convexidade)
                     
-                
+                    if convexidade>0.95:
+                        Teste_borda.append("Contorno OK")
+                    else:
+                        Teste_borda.append("Contorno NOK")
+                    
+                    #generating cropped images in order to make the ML model work:
+                    #documentation used for this part: https://docs.opencv.org/3.4/dc/da3/tutorial_copyMakeBorder.html
+                    #documentation used for this part: https://stackoverflow.com/questions/55733086/opencv-how-to-overcrop-an-image
+                    
+                    #prepparing the image in order to crop it:
+                    src = img1_text
+                    borderType = cv2.BORDER_REPLICATE
+                    boarderSize = .1
+                    top = int(boarderSize * src.shape[0])  # shape[0] = rows
+                    bottom = int(boarderSize * src.shape[0])
+                    left = int(boarderSize * src.shape[1])  # shape[1] = cols
+                    right = left    
+                    value = [randint(0,255), randint(0,255), randint(0,255)]
+                    dst = cv2.copyMakeBorder(src, top, bottom, left, right, borderType, None, value)
+                    
+                    #actually cropping the image
+                    border_height = dst.shape[0]
+                    border_width = dst.shape[1]
+                    x_offset = 0
+                    y_offset = -50
+                    x_min_border = int((border_width - x_des)/2) + x_offset
+                    y_min_border = int((border_height - y_des)/2) + y_offset
+                    x_max_border = int((border_width + x_des)/2) + x_offset
+                    y_max_border = int((border_height  + y_des)/2) + y_offset
+                    
+                    dst_rect = cv2.rectangle(dst, (x_min_border, y_min_border), (x_max_border, y_max_border), (255, 0, 0), 3)
+                    #cv2.rectangle(dst, (int((border_width - x_des)/2), int((border_height - y_des)/2)+20), (int((border_width + x_des)/2),int((border_height + y_des)/2)+20), (255, 0, 0), 3)
+                    
+                    #o comando de crop image funciona na base de (y,x) e não (x,y)
+                    #documentação: https://stackoverflow.com/questions/15589517/how-to-crop-an-image-in-opencv-using-python
+                    cropped_image = dst[y_min_border: y_max_border, x_min_border: x_max_border]
+                    
+                    # Display cropped imagem on a separate window
+                    cv2.imshow("Cropped video snapshot", cropped_image)
+                    
+                    cont_pecas += 1
+
+                    ax = f.add_subplot (4,6,cont_pecas)
+                    #plt.imshow(B, cmap='gray')
+                    #plt.imshow(thresh, cmap='gray')
+                    #plt.imshow(img1_text, cmap='gray')
+                    plt.imshow(dst_rect, cmap='gray')
+                    conjunto_NOK_video.append(cropped_image)
+                    
                 #raises the first_appearance flag
                 if area_contorno<30000 and y>400:
                     first_appearance = True
 
-            #Calculate te moments of the contour         
+            #Calculate the moments of the contour and finds its center
             M = cv2.moments(contorno_out)
-            
+
             if M["m00"] > 0: #avoid crashes caused by a division by zero
                 cX = (M["m10"] / M["m00"])
                 cY = (M["m01"] / M["m00"])
 
-            cv2.drawContours(img1_text,contorno_out,-1,(0,0,255),4)
             hull = cv2.convexHull(contorno_out)
-            cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
+            #cv2.drawContours(img1_text,contorno_out,-1,(0,0,255),4)
+            #cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
             
             #track countour center
+            #cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
+            #cv2.circle(img1_text, (int(cX), int(cY)), raio_ideal_px, (0, 0, 255), 5)
+            cv2.rectangle(img1_text, (int(cX)-raio_ideal_px, int(cY)-raio_ideal_px), (int(cX)+raio_ideal_px, int(cY)+raio_ideal_px), (0, 255, 0), 2)
+            cv2.putText(img1_text, str(cont_pecas), (int(cX), int(cY)), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
             
-            cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
-
         #also, if there are no countours detected in the image it raises the first appearance flag
         else:
             first_appearance = True
             
         # Display the resulting image
-        
         #cv2.imshow('Blob Detection', thresh)
-        cv2.imshow('Blob Detection', img1_text)
+        cv2.imshow('Video Output', img1_text)
         
         # Wait for a key press to exit
         if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -198,10 +191,12 @@ while cap.isOpened():
 
     else:
         break
+
 conjunto_NOK_video=np.stack(conjunto_NOK_video, axis=0)
-# Release the video capture object and close all windows
 #model=keras.models.load_model('./superficie.h5')
 #print(model.predict(conjunto_NOK_video))
+
+# Release the video capture object and close all windows
 cap.release()
 cv2.destroyAllWindows()
 
@@ -213,6 +208,6 @@ df["Status Diametro"]    = Status_Diametro
 df["A/B"]                = Relacao_AB
 df["Status A/B"]         = Status_Raio_AB
 df["Convexidade medida"] = Convexidade_valor
-
+df["Status borda"]       = Teste_borda
 
 print(df)
