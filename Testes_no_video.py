@@ -9,6 +9,7 @@ import pandas as pd # para desenhar/plotar as tabelas informando os status das p
 from filtros_extras import *
 from fillHoles import fillHoles
 from random import randint # used to generate borders to off-limits cropped images
+from math import *
 
 from tensorflow import keras
 
@@ -147,12 +148,14 @@ while cap.isOpened():
                     cv2.drawContours(img1_text,contorno_out,-1,(0,0,255),4)
                     hull = cv2.convexHull(contorno_out)
                     cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
-                    #cv2.circle(img1_text, (cX, cY), 7, (255, 255, 255), -1)
+                    circulo = cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
             
                     area_contorno = cv2.contourArea(contorno_out)
                     area_hull = cv2.contourArea(hull)
+                    area_circulo = int(pi*pow((MA+ma)/4,2))
                     if area_hull >= 1: #evitar que o video crashe por conta de divisão por 0
-                        convexidade = area_contorno/area_hull
+                        #convexidade = area_contorno/area_hull
+                        convexidade = area_contorno/area_circulo
                     #print ([cont_pecas], y, convexidade)
                     
                     cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
