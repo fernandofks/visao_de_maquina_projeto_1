@@ -155,6 +155,8 @@ while cap.isOpened():
                         convexidade = area_contorno/area_hull
                     #print ([cont_pecas], y, convexidade)
                     
+                    cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
+                    
                     Numero_da_peca.append(cont_pecas)
                     Convexidade_valor.append(convexidade)
                     
@@ -175,7 +177,8 @@ while cap.isOpened():
             cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
             
             #track countour center
-            cv2.circle(img1_text, (int(cX), int(cY)), 5, (255, 255, 255), -1)
+            
+            cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
 
         #also, if there are no countours detected in the image it raises the first appearance flag
         else:
