@@ -14,7 +14,7 @@ from math import *
 from tensorflow import keras
 
 # Load the video file
-cap = cv2.VideoCapture('Video1_Vedacao.mp4')
+cap = cv2.VideoCapture('Video2_Vedacao.mp4')
 
 #Flag that checks if the rubber in the image is new or not
 first_appearance = True
@@ -53,11 +53,16 @@ while cap.isOpened():
         img1_text_R = R
         
         # defining and appling thresholds to the image
-        returns,thresh=cv2.threshold(B,120,255,cv2.THRESH_BINARY_INV)
-        thresh = fillHoles(thresh)
+        returns_borda,thresh_borda       = cv2.threshold(B,90, 255,cv2.THRESH_BINARY_INV)
+        returns_diametro,thresh_diametro = cv2.threshold(B,120,255,cv2.THRESH_BINARY_INV)
+        thresh_borda = fillHoles(thresh_borda)
+        thresh_diametro = fillHoles(thresh_diametro)
+        
         
         #find contours in the image
-        contours,hierachy=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        contours_borda,hierachy_borda=cv2.findContours(thresh_borda,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        contours_diametro,hierachy_diametro=cv2.findContours(thresh_diametro,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        
 
         #defining the ideal diameter and ideal area in squared pixels
         diametro_ideal_px = diametro_ideal_mm*(width/tamanho_da_esteira)
@@ -65,23 +70,21 @@ while cap.isOpened():
         area_circulo_ideal = int(pi*pow(raio_ideal_px,2))
         
         
-        if len(contours) != 0:
-            perimetro_max = -1
-            contorno_out=max(contours, key=len)
-            if len(contorno_out)>=5: #necessita de no mínimo 5 para fazer fit ellipse
-                ellipse = cv2.fitEllipse(contorno_out)
+        if len(contours_diametro) != 0 and len(contours_borda)!=0:
+            contorno_max_diametro = max(contours_diametro, key=len)
+            contorno_max_borda = max(contours_borda,key=len)
+            
+            if len(contorno_max_diametro)>=5 and len(contorno_max_borda)>=5: #necessita de no mínimo 5 para fazer fit ellipse
+                ellipse = cv2.fitEllipse(contorno_max_diametro)
                 (x, y), (MA, ma),angle =  ellipse
 
-                area_contorno = cv2.contourArea(contorno_out)
+                area_contorno = cv2.contourArea(contorno_max_diametro)
 
                 #runs the tests and lowers the first_appearance flag    
                 if y > 200 and y< 300 and first_appearance and area_contorno>30000:
                     
                     first_appearance = False
-                    
-                    ##### Raises the count                   
-                    Numero_da_peca.append(cont_pecas)
-                    
+
                     ##### Teste diametro
                     diametro=(MA + ma)/width*tamanho_da_esteira/2
                     Diametro_Peca.append(diametro)
@@ -101,11 +104,12 @@ while cap.isOpened():
                         Status_Raio_AB.append("A/B NOK")
                     
                     ##### Teste de contornos
-                    area_contorno = cv2.contourArea(contorno_out)
-                    #area_hull = cv2.contourArea(hull)
+                    area_contorno = cv2.contourArea(contorno_max_borda)
+                    area_hull = cv2.contourArea(hull)
                     
-                    convexidade = area_contorno/area_circulo_ideal
-                    Convexidade_valor.append(convexidade)
+                    if area_hull>0:
+                        convexidade = area_contorno/area_circulo_ideal
+                        Convexidade_valor.append(convexidade)
                     
                     if convexidade>0.95:
                         Teste_borda.append("Contorno OK")
@@ -117,7 +121,7 @@ while cap.isOpened():
                     #documentation used for this part: https://stackoverflow.com/questions/55733086/opencv-how-to-overcrop-an-image
                     
                     #prepparing the image in order to crop it:
-                    src = img1_text_R
+                    src = img1_text
                     borderType = cv2.BORDER_REPLICATE
                     boarderSize = .1
                     top = int(boarderSize * src.shape[0])  # shape[0] = rows
@@ -145,10 +149,13 @@ while cap.isOpened():
                     cropped_image = dst[y_min_border: y_max_border, x_min_border: x_max_border]
                     
                     # Display cropped imagem on a separate window
-                    cv2.imshow("Cropped video snapshot", cropped_image)
+                    cv2.imshow("Cropped video screenshot", cropped_image)
                     
+                    
+                    ##### raises and register the count
                     cont_pecas += 1
-
+                    Numero_da_peca.append(cont_pecas)
+                    
                     ax = f.add_subplot (4,6,cont_pecas)
                     #plt.imshow(B, cmap='gray')
                     #plt.imshow(thresh, cmap='gray')
@@ -161,20 +168,22 @@ while cap.isOpened():
                     first_appearance = True
 
             #Calculate the moments of the contour and finds its center
-            M = cv2.moments(contorno_out)
+            M = cv2.moments(contorno_max_diametro)
 
             if M["m00"] > 0: #avoid crashes caused by a division by zero
                 cX = (M["m10"] / M["m00"])
                 cY = (M["m01"] / M["m00"])
 
-            hull = cv2.convexHull(contorno_out)
-            #cv2.drawContours(img1_text,contorno_out,-1,(0,0,255),4)
+            hull = cv2.convexHull(contorno_max_diametro)
+            cv2.drawContours(img1_text,contorno_max_borda,-1,(0,255,255),2)
+            #cv2.drawContours(img1_text,contorno_max_diametro,-1,(255,0,0),2)
+            
             #cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
             
             #track countour center
             #cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255, 255, 255), 5)
-            #cv2.circle(img1_text, (int(cX), int(cY)), raio_ideal_px, (0, 0, 255), 5)
-            cv2.rectangle(img1_text, (int(cX)-raio_ideal_px, int(cY)-raio_ideal_px), (int(cX)+raio_ideal_px, int(cY)+raio_ideal_px), (0, 255, 0), 2)
+            cv2.circle(img1_text, (int(cX), int(cY)), raio_ideal_px, (0, 0, 255), 5)
+            #cv2.rectangle(img1_text, (int(cX)-raio_ideal_px, int(cY)-raio_ideal_px), (int(cX)+raio_ideal_px, int(cY)+raio_ideal_px), (0, 255, 0), 2)
             cv2.putText(img1_text, str(cont_pecas), (int(cX), int(cY)), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
             
         #also, if there are no countours detected in the image it raises the first appearance flag
@@ -210,4 +219,4 @@ df["Status A/B"]         = Status_Raio_AB
 df["Convexidade medida"] = Convexidade_valor
 df["Status borda"]       = Teste_borda
 
-#print(df)
+print(df)

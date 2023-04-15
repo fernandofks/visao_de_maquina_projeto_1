@@ -16,8 +16,8 @@ from fillHoles import fillHoles
 
 #Parte 1: Importando e lendo todos os arquivos em uma pasta:
 
-#path = "OK"
-path = "NOK_borda"
+path = "OK"
+#path = "NOK_borda"
 
 dir_list = os.listdir(path)
 print(dir_list)
