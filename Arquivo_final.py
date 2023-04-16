@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 
 import pandas as pd # para desenhar/plotar as tabelas informando os status das peças em cada teste
 
-from filtros_extras import *
 from fillHoles import fillHoles
 from random import randint # used to generate borders to off-limits cropped images
 from math import *
@@ -20,7 +19,7 @@ cap = cv2.VideoCapture('Video1_Vedacao.mp4')
 first_appearance = True
 
 cont_pecas = 0 
-conjunto_NOK_video=[]
+conjunto_video=[]
 diametro_ideal_mm = 50
 tamanho_da_esteira = 75.6
 x_des,y_des = (int(508),int(486))
@@ -121,19 +120,7 @@ while cap.isOpened():
                     
                     ##### Teste de contornos novo (via Convexity Defects)
                     # Tutorial e referencia: https://medium.com/analytics-vidhya/contours-and-convex-hull-in-opencv-python-d7503f6651bc
-                    #if area_hull>0:
-                    print (len(contorno_max_borda))
-                    #for each in hull:
-                        #defects = cv2.convexityDefects(contorno_max_diametro, each)
-                        #print(defects)
-                        #if not defects:
-                        #    continue
-                        #for i in range(defects.shape[0]):
-                        #    s, e, f, d = defects[i, 0]
-                        #    start = tuple(contorno_max_diametro[s][0])
-                        #    end = tuple(contorno_max_diametro[e][0])
-                        #    far = tuple(contorno_max_diametro[f][0])
-                           # cv.circle(img, far, 5, [0, 0, 255], -1)
+                    
                     defects = cv2.convexityDefects(contorno_max_borda, hull)
                     max_defect = 0 #finds the largest distance between contour and hull
                     #print (defects) #mede a maior distancia entre contorno e borda
@@ -196,7 +183,7 @@ while cap.isOpened():
                     #plt.imshow(thresh, cmap='gray')
                     #plt.imshow(img1_text, cmap='gray')
                     plt.imshow(dst_rect, cmap='gray')
-                    conjunto_NOK_video.append(cropped_image)
+                    conjunto_video.append(cropped_image)
                     
                 #raises the first_appearance flag
                 if area_contorno<30000 and y>400:
@@ -237,9 +224,9 @@ while cap.isOpened():
     else:
         break
 
-#conjunto_NOK_video=np.stack(conjunto_NOK_video, axis=0)
-#model=keras.models.load_model('./superficie_video.h5')
-#print(model.predict(conjunto_NOK_video))
+conjunto_video=np.stack(conjunto_video, axis=0)
+model=keras.models.load_model('./superficie_video.h5')
+print(model.predict(conjunto_video))
 
 # Release the video capture object and close all windows
 cap.release()

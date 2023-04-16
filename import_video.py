@@ -13,7 +13,7 @@ from random import randint # used to generate borders to off-limits cropped imag
 from tensorflow import keras
 
 # Load the video file
-cap = cv2.VideoCapture('Video2_Vedacao.mp4')
+cap = cv2.VideoCapture('Video1_Vedacao.mp4')
 
 #Flag that checks if the rubber in the image is new or not
 first_appearance = True
@@ -21,7 +21,7 @@ first_appearance = True
 cont_pecas = 0 
 conjunto_NOK_video=[]
 tamanho_da_esteira = 75.6
-x_des,y_des = (int(508),int(468))
+x_des,y_des = (int(508),int(486))
 
 df = pd.DataFrame()
 #test_result lists, for every rubber the test result will be appended here and they will be added as a dataSeries to a dataFrame
@@ -76,7 +76,7 @@ while cap.isOpened():
                     #documentation used for this part: https://docs.opencv.org/3.4/dc/da3/tutorial_copyMakeBorder.html
                     #documentation used for this part: https://stackoverflow.com/questions/55733086/opencv-how-to-overcrop-an-image
                     
-                    src = img1_text
+                    src = img1_text_R
                     borderType = cv2.BORDER_REPLICATE
                     boarderSize = .1
                     top = int(boarderSize * src.shape[0])  # shape[0] = rows
@@ -197,8 +197,8 @@ while cap.isOpened():
         break
 conjunto_NOK_video=np.stack(conjunto_NOK_video, axis=0)
 # Release the video capture object and close all windows
-#model=keras.models.load_model('./superficie.h5')
-#print(model.predict(conjunto_NOK_video))
+model=keras.models.load_model('./superficie_video.h5')
+print(model.predict(conjunto_NOK_video))
 cap.release()
 cv2.destroyAllWindows()
 
