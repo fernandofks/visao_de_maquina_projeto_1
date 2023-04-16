@@ -13,7 +13,7 @@ from math import *
 from tensorflow import keras
 
 # Load the video file
-cap = cv2.VideoCapture('Video1_Vedacao.mp4')
+cap = cv2.VideoCapture('Video2_Vedacao.mp4')
 
 #Flag that checks if the rubber in the image is new or not
 first_appearance = True
@@ -157,7 +157,7 @@ while cap.isOpened():
                     border_height = dst.shape[0]
                     border_width = dst.shape[1]
                     x_offset = 0
-                    y_offset = -50
+                    y_offset = -70
                     x_min_border = int((border_width - x_des)/2) + x_offset
                     y_min_border = int((border_height - y_des)/2) + y_offset
                     x_max_border = int((border_width + x_des)/2) + x_offset
@@ -226,7 +226,8 @@ while cap.isOpened():
 
 conjunto_video=np.stack(conjunto_video, axis=0)
 model=keras.models.load_model('./superficie_video.h5')
-print(model.predict(conjunto_video))
+superficie_results = model.predict(conjunto_video)
+#print(model.predict(conjunto_video))
 
 # Release the video capture object and close all windows
 cap.release()
@@ -235,11 +236,11 @@ cv2.destroyAllWindows()
 plt.show()
 
 df["Numero da Peca"]     = Numero_da_peca
+df["Status borda"]       = Teste_borda
 df["Diametro"]           = Diametro_Peca
 df["Status Diametro"]    = Status_Diametro
 df["A/B"]                = Relacao_AB
 df["Status A/B"]         = Status_Raio_AB
-#df["Convexidade medida"] = Convexidade_valor
-df["Status borda"]       = Teste_borda
+df["Superfície"]         = superficie_results
 
 print(df)

@@ -13,7 +13,7 @@ from random import randint # used to generate borders to off-limits cropped imag
 from tensorflow import keras
 
 # Load the video file
-cap = cv2.VideoCapture('Video1_Vedacao.mp4')
+cap = cv2.VideoCapture('Video2_Vedacao.mp4')
 
 #Flag that checks if the rubber in the image is new or not
 first_appearance = True
@@ -197,7 +197,7 @@ while cap.isOpened():
         break
 conjunto_NOK_video=np.stack(conjunto_NOK_video, axis=0)
 # Release the video capture object and close all windows
-model=keras.models.load_model('./superficie_video.h5')
+model=keras.models.load_model('./superficie_video3.h5')
 print(model.predict(conjunto_NOK_video))
 cap.release()
 cv2.destroyAllWindows()
