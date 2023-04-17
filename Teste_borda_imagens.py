@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 import pandas as pd # para desenhar/plotar as tabelas informando os status das peças em cada teste
 
-from filtros_extras import *
+from math import *
 from fillHoles import fillHoles
 
 #importar imagens de todas as pastas
@@ -79,7 +79,7 @@ for i in range(0,len(dir_list)):
             contorno_out = contours[j]
             
     # Get the convex hull of the shape and plot its contour:
-    hull = cv2.convexHull(contorno_out)
+    hull = cv2.convexHull(contorno_out, returnPoints=False)
 
     #find the radius of contour
     if len(contorno_out)>=5: #necessita de no mínimo 5 para fazer fit ellipse
@@ -97,7 +97,7 @@ for i in range(0,len(dir_list)):
     raio_ideal_px = int(diametro_ideal_px/2)
     
     area_contorno = cv2.contourArea(contorno_out)
-    area_hull = cv2.contourArea(hull)
+    #area_hull = cv2.contourArea(hull)
     area_circulo = int(pi*pow((MA+ma)/4,2))
     area_circulo_ideal = int(pi*pow(raio_ideal_px,2))
     
@@ -107,23 +107,51 @@ for i in range(0,len(dir_list)):
     #cv2.circle(img1_text, (int(cX), int(cY)), int((MA+ma)/4), (255,0, 0), 8)
     cv2.circle(img1_text, (int(cX), int(cY)), raio_ideal_px, (255,0, 0), 8)
     cv2.drawContours(img1_text,contorno_out,-1,(0,0,255),4)
-    cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
+    #cv2.drawContours(img1_text,hull,-1,(0,255,0),8)
     
-
+    defects = cv2.convexityDefects(contorno_out, hull)
+    max_defect = 0 #finds the largest distance between contour and hull
+    max_depths = 0
+    max_far = 0
+    #print (defects) #mede a maior distancia entre contorno e borda
     
-    if convexidade < 0.95:
-        Teste_borda.append("Reprovado")
+    for element in defects:
+        #print("far",element[0][2])
+        #print("depth",element[0][3])
+        far = element[0][2]
+        depth = element[0][3]
+        
+        if depth - far > max_defect:
+            max_defect = depth - far
+        if depth > max_depths:
+            max_depths = depth
+        if far > max_far:
+            max_far = far
+    
+    convex = cv2.isContourConvex(contorno_out)
+    #print (convex)
+    
+    print ("depth",depth)
+    print ("far",far)
+    print ("max_defect", max_defect)
+    if max_defect < 2890:
+        Teste_borda.append('OK')
     else:
-        Teste_borda.append("Aprovado")
+        Teste_borda.append('NOK')
+    
+    #if convexidade < 0.95:
+    #    Teste_borda.append("Reprovado")
+    #else:
+    #    Teste_borda.append("Aprovado")
             
     #print ("Perimetro",[i], perimetro_max)
-    print ("Area_Circulo_fit", [i], area_circulo)
-    print ("Area_Circulo_ideal", [i], area_circulo_ideal)
-    print ("Area_Contorno", [i], area_contorno)
-    print ("Area_Hull", [i], area_hull ,"\n")
+    #print ("Area_Circulo_fit", [i], area_circulo)
+    #print ("Area_Circulo_ideal", [i], area_circulo_ideal)
+    #print ("Area_Contorno", [i], area_contorno)
+    #print ("Area_Hull", [i], area_hull ,"\n")
     
     
-    print ("Convexidade",[i], convexidade ,"\n")
+    #print ("Convexidade",[i], convexidade ,"\n")
     Convexidade_valor.append(convexidade)
 
     ax = f.add_subplot (3,5,i+1)
